@@ -1,0 +1,125 @@
+<%- include('layout', { part: 'head', scripts: ['/vendor/chart.js'] }) %>
+
+<div class="page-head no-print">
+  <div>
+    <h1 class="page-title">Laporan</h1>
+    <p class="text-sm text-slate-500">Laporan pekerjaan bulanan dan statistik.</p>
+  </div>
+  <div class="flex gap-2">
+    <button type="button" class="btn btn-outline" data-print>Cetak</button>
+    <button type="button" class="btn btn-primary" data-print="pdf">Export PDF</button>
+  </div>
+</div>
+
+<form class="card no-print mb-6 grid grid-cols-2 gap-2 sm:grid-cols-5" method="get" action="/laporan">
+  <select name="bulan" class="input" aria-label="Bulan">
+    <% BULAN.forEach((b, i) => { %><option value="<%= i + 1 %>" <%= f.bulan === i + 1 ? 'selected' : '' %>><%= b %></option><% }) %>
+  </select>
+  <select name="tahun" class="input" aria-label="Tahun">
+    <% tahunList.forEach((t) => { %><option <%= String(t) === String(f.tahun) ? 'selected' : '' %>><%= t %></option><% }) %>
+  </select>
+  <select name="kategori" class="input" aria-label="Kategori">
+    <option value="">Semua kategori</option>
+    <% Object.keys(kategoriMap).forEach((k) => { %><option <%= f.kategori === k ? 'selected' : '' %>><%= k %></option><% }) %>
+  </select>
+  <select name="status" class="input" aria-label="Status">
+    <option value="">Semua status</option>
+    <% STATUS.forEach((s) => { %><option <%= f.status === s ? 'selected' : '' %>><%= s %></option><% }) %>
+  </select>
+  <button class="btn btn-primary col-span-2 sm:col-span-1">Tampilkan</button>
+</form>
+
+<article class="card report" id="report">
+  <header class="report-head">
+    <div class="text-lg font-bold tracking-tight text-blue-600 print:text-slate-900">KERJAIN</div>
+    <h2 class="mt-1 text-base font-semibold uppercase tracking-wide">Laporan Pekerjaan</h2>
+    <p class="text-sm"><%= periode %></p>
+  </header>
+
+  <table class="identity">
+    <tbody>
+      <tr><td>Nama</td><td>: <%= settings.nama_pengguna || '—' %></td></tr>
+      <% if (settings.nip) { %><tr><td>NIP</td><td>: <%= settings.nip %></td></tr><% } %>
+      <% if (settings.jabatan) { %><tr><td>Jabatan</td><td>: <%= settings.jabatan %></td></tr><% } %>
+      <tr><td>Unit</td><td>: <%= settings.unit || '—' %></td></tr>
+      <tr><td>Instansi</td><td>: <%= settings.nama_instansi || '—' %></td></tr>
+      <tr><td>Periode</td><td>: <%= periode %><%= f.kategori ? ' · ' + f.kategori : '' %><%= f.status ? ' · ' + f.status : '' %></td></tr>
+    </tbody>
+  </table>
+  <% if (!settings.nama_pengguna || !settings.nama_instansi) { %>
+    <p class="no-print mb-4 rounded border border-amber-600/30 bg-amber-50 px-3 py-2 text-sm text-amber-800">Lengkapi nama dan instansi di <a href="/pengaturan" class="font-medium underline">Pengaturan</a> agar laporan lengkap.</p>
+  <% } %>
+
+  <h3 class="section-title">Ringkasan</h3>
+  <table class="summary">
+    <tbody>
+      <tr class="font-semibold"><td>Total</td><td><%= items.length %></td></tr>
+      <% perKategori.forEach((k) => { %><tr><td><%= k.label %></td><td><%= k.total %></td></tr><% }) %>
+      <tr><td>Selesai</td><td><%= selesai %></td></tr>
+      <tr><td>Berjalan</td><td><%= items.length - selesai %></td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="section-title">Rincian Pekerjaan</h3>
+  <% if (items.length) { %>
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>No</th><th>Tanggal</th><th>Pekerjaan</th><th>Kategori</th><th>Hasil</th><th>Status</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <% items.forEach((p, i) => { %>
+            <tr>
+              <td class="text-center"><%= i + 1 %></td>
+              <td class="whitespace-nowrap"><%= tglPendek(p.tanggal) %></td>
+              <td><a href="/pekerjaan/<%= p.id %>" class="font-medium print:font-normal"><%= p.judul %></a><% if (p.pegawai) { %><div class="text-xs text-slate-500">Membantu: <%= p.pegawai %></div><% } %></td>
+              <td><%= p.kategori %><%= p.subkategori ? ' / ' + p.subkategori : '' %></td>
+              <td><%= p.hasil || '—' %></td>
+              <td><%= p.status %></td>
+              <td class="text-center"><% if (p.drive_folder_url) { %><a href="<%= p.drive_folder_url %>" target="_blank" rel="noopener" class="text-blue-600">Buka</a><% } else { %>—<% } %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } else { %>
+    <div class="empty"><p class="font-medium">Belum ada pekerjaan pada periode ini.</p></div>
+  <% } %>
+
+  <div class="signature">
+    <p>Dicetak pada <%= dicetak %></p>
+    <p>Yang membuat,</p>
+    <div class="h-16"></div>
+    <p class="font-semibold underline-offset-2"><%= settings.nama_pengguna || '..............................' %></p>
+    <% if (settings.nip) { %><p>NIP. <%= settings.nip %></p><% } %>
+  </div>
+</article>
+
+<% if (items.length) { %>
+<section class="no-print mt-6 grid gap-6 md:grid-cols-2" aria-label="Statistik">
+  <div class="card">
+    <h2 class="card-title mb-3">Pekerjaan berdasarkan Kategori</h2>
+    <div style="height: <%= Math.max(120, perKategori.length * 40) %>px"><canvas data-chart='<%- JSON.stringify(perKategori).replace(/'/g, "&#39;").replace(/</g, "\\u003c") %>' aria-label="Grafik pekerjaan per kategori" role="img"></canvas></div>
+  </div>
+  <div class="card">
+    <h2 class="card-title mb-3">Jenis Pekerjaan</h2>
+    <div style="height: <%= Math.max(120, perJenis.length * 40) %>px"><canvas data-chart='<%- JSON.stringify(perJenis).replace(/'/g, "&#39;").replace(/</g, "\\u003c") %>' aria-label="Grafik jenis pekerjaan" role="img"></canvas></div>
+  </div>
+  <div class="card">
+    <h2 class="card-title mb-3">Masalah Terbanyak</h2>
+    <% if (masalah.length) { %>
+      <ul class="divide-y divide-slate-100 text-sm">
+        <% masalah.forEach((m) => { %><li class="flex justify-between gap-3 py-2"><a class="truncate text-slate-700 hover:text-blue-600" href="/pekerjaan?q=<%= encodeURIComponent(m.label) %>"><%= m.label %></a><span class="font-semibold tabular-nums"><%= m.total %></span></li><% }) %>
+      </ul>
+    <% } else { %><p class="text-sm text-slate-500">Belum ada masalah yang dicatat.</p><% } %>
+  </div>
+  <div class="card">
+    <h2 class="card-title mb-3">Bantuan Pegawai</h2>
+    <% if (bantuan.length) { %>
+      <ul class="divide-y divide-slate-100 text-sm">
+        <% bantuan.forEach((b) => { %><li class="flex justify-between py-2"><span class="text-slate-700"><%= b.label %></span><span class="font-semibold tabular-nums"><%= b.total %></span></li><% }) %>
+      </ul>
+    <% } else { %><p class="text-sm text-slate-500">Belum ada bantuan pegawai pada periode ini.</p><% } %>
+  </div>
+</section>
+<% } %>
+
+<%- include('layout', { part: 'foot', scripts: ['/vendor/chart.js'] }) %>

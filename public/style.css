@@ -1,0 +1,230 @@
+/* KERJAIN — sumber Tailwind. Dibangun menjadi public/app.css (npm run build:css). */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { -webkit-tap-highlight-color: transparent; }
+  body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  a { @apply outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1; }
+}
+
+@layer components {
+  .card { @apply min-w-0 rounded-lg border border-slate-200 bg-white p-4 md:p-5; }
+  .card-head { @apply mb-3 flex items-center justify-between gap-3; }
+  .card-title { @apply text-sm font-semibold text-slate-900; }
+  .page-head { @apply mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between; }
+  .page-title { @apply text-xl font-semibold tracking-tight text-slate-900; }
+  .section-title { @apply mb-2 mt-6 text-sm font-semibold text-slate-900; }
+
+  .btn { @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-md border border-transparent px-4 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1; }
+  .btn-sm { @apply min-h-[36px] px-3 text-xs; }
+  .btn-primary { @apply bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800; }
+  .btn-outline { @apply border-slate-200 bg-white text-slate-700 hover:border-blue-600 hover:text-blue-600 active:bg-slate-50; }
+  .btn-danger { @apply bg-red-600 text-white hover:bg-red-700 active:bg-red-800 focus-visible:ring-red-600; }
+  .btn-danger-outline { @apply border-slate-200 bg-white text-red-600 hover:border-red-600 active:bg-red-50; }
+  .btn.is-busy { @apply cursor-wait; }
+  .icon-btn { @apply inline-flex h-10 w-10 items-center justify-center rounded-md text-slate-600 hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600; }
+
+  .label { @apply mb-1.5 block text-sm font-medium text-slate-700; }
+  .input { @apply block min-h-[44px] w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-base text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 md:text-sm; }
+  textarea.input { @apply min-h-[88px]; }
+  .hint { @apply mt-1 text-xs text-slate-500; }
+  .form-grid { @apply grid gap-4 md:grid-cols-2; }
+  .detail-box { @apply rounded-md border border-slate-200 p-4; }
+  .detail-box > summary { @apply cursor-pointer text-sm font-medium text-slate-700; }
+
+  .segmented { @apply grid grid-cols-2 gap-2; }
+  .segmented label { @apply cursor-pointer; }
+  .segmented input { @apply sr-only; }
+  .segmented span { @apply flex min-h-[44px] items-center justify-center rounded-md border border-slate-200 text-sm font-medium text-slate-600; }
+  .segmented input:checked + span { @apply border-blue-600 bg-blue-50 text-blue-700; }
+  .segmented input:focus-visible + span { @apply ring-2 ring-blue-600; }
+
+  .badge { @apply inline-flex shrink-0 items-center rounded px-2 py-0.5 text-xs font-medium; }
+  .badge-ok { @apply bg-green-50 text-green-700; }
+  .badge-warn { @apply bg-amber-50 text-amber-700; }
+  .badge-lg { @apply gap-1.5 px-2.5 py-1 text-sm; }
+  .badge-dot { @apply h-1.5 w-1.5 rounded-full bg-current; }
+
+  .stat { @apply relative flex flex-col gap-0.5 transition-colors hover:border-blue-600; }
+  .stat-icon { @apply absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-md md:right-4 md:top-4; }
+  .stat-num { @apply text-2xl font-semibold tabular-nums text-slate-900; }
+  .stat-label { @apply text-sm text-slate-500; }
+
+  .nav-link { @apply flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900; }
+  .nav-active { @apply bg-blue-50 text-blue-700 hover:bg-blue-50 hover:text-blue-700; }
+
+  .empty { @apply flex flex-col items-center py-8 text-center; }
+  .check-row { @apply flex cursor-pointer items-center gap-3 py-3; }
+
+  /* Timeline */
+  .timeline { @apply relative; }
+  .tl-item { @apply relative flex items-center gap-3 rounded-md px-1 py-2.5 hover:bg-slate-50; }
+  .tl-time { @apply w-11 shrink-0 text-sm font-medium tabular-nums text-slate-600; }
+  .tl-dot { @apply relative z-10 h-2.5 w-2.5 shrink-0 rounded-full ring-4 ring-white; }
+  .timeline::before { content: ""; @apply absolute bottom-3 top-3 w-px bg-slate-200; left: calc(0.25rem + 2.75rem + 0.75rem + 0.3rem); }
+  .day-group + .day-group { @apply mt-4 border-t border-slate-100 pt-4; }
+  .day-head { @apply mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500; }
+
+  .detail-list { @apply space-y-4; }
+  .detail-list dt { @apply text-xs font-semibold uppercase tracking-wide text-slate-500; }
+  .detail-list dd { @apply mt-1 whitespace-pre-line text-sm text-slate-800; }
+  .kb-item { @apply py-3; }
+  .kb-item > summary { @apply cursor-pointer font-medium text-slate-800; }
+
+  /* Navigasi bawah mobile */
+  .bottom-nav { @apply fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 items-center border-t border-slate-200 bg-white; padding-bottom: env(safe-area-inset-bottom); }
+  .bottom-nav > a { @apply flex h-16 flex-col items-center justify-center gap-0.5 text-[11px] font-medium text-slate-500; }
+  .fab { @apply mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2; }
+
+  /* Quick log: bottom sheet di mobile, dialog di desktop */
+  .sheet { @apply m-0 mt-auto w-full max-w-none rounded-t-xl border border-slate-200 bg-white p-5 text-slate-900 md:m-auto md:max-w-md md:rounded-lg; padding-bottom: calc(1.25rem + env(safe-area-inset-bottom)); }
+  .sheet::backdrop { background: rgb(15 23 42 / 0.4); }
+
+  /* Toast: kartu putih dengan garis warna di kiri sesuai jenis pesan */
+  .toasts { @apply pointer-events-none fixed inset-x-3 z-50 flex flex-col items-center gap-2 md:inset-x-auto md:right-6 md:items-end; bottom: calc(4.75rem + env(safe-area-inset-bottom)); }
+  .toast { @apply pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-lg border border-l-[3px] border-slate-200 bg-white py-3 pl-3 pr-2 text-sm text-slate-800 shadow-sm; transition: opacity .18s ease, transform .18s ease; }
+  .toast.is-enter, .toast.is-leave { opacity: 0; transform: translateY(6px); }
+  .toast-icon { @apply mt-px shrink-0; }
+  .toast-body { @apply min-w-0 flex-1 leading-snug; }
+  .toast-action { @apply mt-1 block font-semibold text-blue-600 hover:underline; }
+  .toast-close { @apply -my-1 flex h-7 w-7 shrink-0 items-center justify-center rounded text-slate-400 hover:bg-slate-100 hover:text-slate-600; }
+  .toast-success { @apply border-l-green-600; }
+  .toast-success .toast-icon { @apply text-green-600; }
+  .toast-error { @apply border-l-red-600; }
+  .toast-error .toast-icon { @apply text-red-600; }
+  .toast-warning { @apply border-l-amber-600; }
+  .toast-warning .toast-icon { @apply text-amber-600; }
+  .toast-info { @apply border-l-blue-600; }
+  .toast-info .toast-icon { @apply text-blue-600; }
+
+  .spinner { @apply inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent; }
+
+  /* Loading & status global */
+  .topbar { @apply pointer-events-none fixed left-0 top-0 z-[60] h-0.5 w-0 bg-blue-600 opacity-0; }
+  .offline { @apply fixed inset-x-0 top-0 z-[55] flex items-center justify-center gap-2 bg-amber-600 px-4 pb-1.5 text-xs font-medium text-white; padding-top: calc(0.375rem + env(safe-area-inset-top)); }
+  .skeleton { @apply animate-pulse rounded bg-slate-100; }
+  .is-loading { @apply pointer-events-none opacity-60 transition-opacity; }
+
+  /* Elemen kecil */
+  .kbd { @apply ml-auto hidden rounded border border-white/40 px-1.5 text-[10px] font-semibold leading-4 md:inline-block; }
+  .kbd-light { @apply ml-0 border-slate-300 bg-white text-slate-500; }
+  .avatar { @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-50 text-sm font-semibold text-blue-700; }
+  .chip { @apply inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-medium text-slate-700 hover:border-blue-600 hover:text-blue-600; }
+  .chip span { @apply text-[10px] text-slate-400; }
+  .count { @apply ml-1 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-slate-100 px-1.5 text-xs font-semibold text-slate-600; }
+  .count:empty { @apply hidden; }
+  .count-warn { @apply bg-amber-50 text-amber-700; }
+  .notice { @apply rounded-md border px-3 py-2.5 text-sm leading-relaxed; }
+  .notice-info { @apply border-blue-600/20 bg-blue-50 text-blue-800; }
+  .notice-warn { @apply border-amber-600/30 bg-amber-50 text-amber-800; }
+  .empty-icon { @apply mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500; }
+  .meta-row { @apply flex flex-col gap-1 text-sm text-slate-600 sm:flex-row sm:flex-wrap sm:gap-x-4; }
+  .meta-row > span { @apply inline-flex items-center gap-1.5; }
+  .meta-row svg { @apply text-slate-400; }
+  .breadcrumb { @apply mb-4 flex min-w-0 items-center gap-2 text-sm text-slate-500; }
+  .breadcrumb a { @apply hover:text-blue-600; }
+  .progress-track { @apply h-2 w-full overflow-hidden rounded-full bg-slate-100; }
+  .progress-fill { @apply h-full rounded-full bg-blue-600 transition-[width] duration-300; }
+
+  /* Form */
+  .label-row { @apply flex items-center justify-between gap-2; }
+  .link-btn { @apply mb-1.5 text-xs font-medium text-blue-600 hover:underline focus:outline-none focus-visible:underline; }
+  .input-error { @apply border-red-600 focus:border-red-600 focus:ring-red-600; }
+  .field-error { @apply mt-1 text-xs font-medium text-red-600; }
+  .counter { @apply mt-1 text-right text-[11px] tabular-nums text-slate-400; }
+  .counter.is-near { @apply text-amber-600; }
+  .form-actions { @apply sticky z-10 -mx-4 flex gap-2 border-t border-slate-200 bg-white px-4 py-3 sm:static sm:mx-0 sm:justify-end sm:border-0 sm:p-0; bottom: calc(4rem + env(safe-area-inset-bottom)); }
+  .form-actions > .btn-primary { @apply flex-1 sm:flex-none; }
+
+  /* Upload evidence */
+  .upload { @apply rounded-md transition-colors; }
+  .upload label.btn { @apply whitespace-nowrap px-3; }
+  .upload.is-drag { @apply bg-blue-50 outline-dashed outline-2 outline-offset-4 outline-blue-600; }
+  .drop-hint { @apply mt-2 hidden text-center text-xs text-slate-400 md:block; }
+  .file-list { @apply mt-3 space-y-2 empty:mt-0; }
+  .file-item { @apply flex items-center gap-3 rounded-md border border-slate-200 bg-white p-2; }
+  .file-thumb { @apply flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded bg-slate-100 text-[10px] font-bold text-slate-500; }
+  .file-thumb img { @apply h-full w-full object-cover; }
+  .upload-progress { @apply mt-3 space-y-1.5; }
+  .evidence-list { @apply space-y-1; }
+  .evidence-list a { @apply flex items-center gap-3 rounded-md p-2 hover:bg-slate-50; }
+
+  /* Dialog */
+  .dialog-sm { @apply m-auto w-[calc(100%-2rem)] max-w-sm rounded-lg border border-slate-200 bg-white p-5 text-slate-900; }
+  .dialog-sm::backdrop { background: rgb(15 23 42 / 0.4); }
+  .confirm-icon { @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600; }
+  .sheet-handle { @apply mx-auto -mt-2 mb-1 h-1 w-10 rounded-full bg-slate-200; }
+  dialog[open] { animation: dialog-in .18s ease-out; }
+  dialog[open]::backdrop { animation: backdrop-in .18s ease-out; }
+
+  /* Ajakan pasang aplikasi (PWA) */
+  .install-banner { @apply mb-5 flex items-center gap-3 rounded-lg border border-blue-600/20 bg-blue-50 p-3; }
+  .install-steps { @apply mt-5 space-y-4; }
+  .install-steps li { @apply flex gap-3 text-sm text-slate-700; }
+  .install-num { @apply flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-semibold text-white; }
+  .install-chip { @apply mt-2 inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-800; }
+
+  /* Landing page publik */
+  .landing section[id] { @apply scroll-mt-16; }
+  .lp-wrap { @apply mx-auto w-full max-w-6xl px-4 md:px-8; }
+  .lp-nav { @apply hidden rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:text-blue-600 md:inline-flex; }
+  .lp-section { @apply py-12 md:py-20; }
+  .lp-eyebrow { @apply text-xs font-semibold uppercase tracking-wide text-blue-600; }
+  .lp-title { @apply mt-1 text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl; }
+  .lp-icon { @apply flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 text-blue-600; }
+
+  /* Laporan */
+  .report-head { @apply mb-4 border-b border-slate-200 pb-4 text-center; }
+  .identity { @apply mb-4 text-sm; }
+  .identity td { @apply py-0.5 align-top; }
+  .identity td:first-child { @apply w-24 text-slate-600; }
+  .summary { @apply w-full max-w-xs text-sm; }
+  .summary td { @apply border-b border-slate-100 py-1; }
+  .summary td:last-child { @apply text-right tabular-nums; }
+  .table-wrap { @apply -mx-4 overflow-x-auto px-4 md:mx-0 md:px-0; }
+  .data { @apply w-full min-w-[640px] border-collapse text-sm; }
+  .data th { @apply border border-slate-200 bg-slate-50 px-2 py-2 text-left text-xs font-semibold text-slate-700; }
+  .data td { @apply border border-slate-200 px-2 py-2 align-top; }
+  .signature { @apply ml-auto mt-10 w-64 text-sm; }
+
+  /* FullCalendar disesuaikan dengan tema flat */
+  .kalender { --fc-border-color: #E2E8F0; --fc-today-bg-color: #EFF6FF; --fc-event-bg-color: #EFF6FF; --fc-event-border-color: #EFF6FF; --fc-event-text-color: #1D4ED8; --fc-button-bg-color: #FFFFFF; --fc-button-border-color: #E2E8F0; --fc-button-text-color: #475569; --fc-button-hover-bg-color: #F8FAFC; --fc-button-hover-border-color: #2563EB; --fc-button-active-bg-color: #EFF6FF; --fc-button-active-border-color: #2563EB; @apply text-sm; }
+  .kalender .fc-toolbar-title { @apply text-base font-semibold capitalize; }
+  .kalender .fc-button { @apply shadow-none text-sm; }
+  .kalender .fc-button:focus { box-shadow: none !important; }
+  .kalender .fc-col-header-cell-cushion { @apply py-2 text-xs font-medium text-slate-500; }
+  .kalender .fc-daygrid-day-number { @apply text-xs text-slate-700; }
+  .kalender .fc-daygrid-day { @apply cursor-pointer; }
+  .kalender .fc-daygrid-event { @apply rounded px-1 text-[11px] font-medium; }
+  .kalender .fc-day-selected { background: #EFF6FF; outline: 1px solid #2563EB; outline-offset: -1px; }
+}
+
+@keyframes dialog-in { from { opacity: 0; transform: translateY(12px); } }
+@keyframes backdrop-in { from { opacity: 0; } }
+@media (min-width: 768px) {
+  .toasts { bottom: 1.5rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+@media (max-width: 640px) {
+  .kalender .fc-toolbar { @apply gap-2; }
+  .kalender .fc-daygrid-event { @apply px-0.5 text-[10px]; }
+}
+
+/* Cetak / Export PDF */
+@media print {
+  @page { size: A4; margin: 16mm 14mm; }
+  body { background: #fff; }
+  .no-print, aside, header.md\:hidden { display: none !important; }
+  main { padding-left: 0 !important; }
+  main > div { max-width: none !important; padding: 0 !important; }
+  .report { border: 0 !important; padding: 0 !important; }
+  .data { min-width: 0; font-size: 10pt; }
+  .data tr { break-inside: avoid; }
+  .table-wrap { overflow: visible; margin: 0; padding: 0; }
+  a { color: inherit !important; text-decoration: none; }
+}

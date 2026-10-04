@@ -1,0 +1,220 @@
+<% if (part === 'head') { %><!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#FFFFFF">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="KERJAIN">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="format-detection" content="telephone=no">
+  <title><%= title ? title + ' · ' : '' %>KERJAIN</title>
+  <link rel="stylesheet" href="/app.css?v=<%= ASSET_V.css %>">
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased">
+  <div id="topbar" class="topbar no-print" aria-hidden="true"></div>
+  <div id="offline" class="offline no-print hidden" role="status"><%- icon('alert', 'h-4 w-4') %> Anda sedang offline. Perubahan belum dapat disimpan.</div>
+<% if (user) {
+  const nav = [
+    ['/', 'Dashboard', 'home'],
+    ['/pekerjaan', 'Pekerjaan', 'list'],
+    ['/kalender', 'Kalender', 'calendar'],
+    ['/pekerjaan?evidence=1', 'Evidence', 'folder'],
+    ['/laporan', 'Laporan', 'report'],
+    ['/knowledge', 'Knowledge Base', 'book'],
+    ['/pengaturan', 'Pengaturan', 'gear'],
+  ];
+  const active = (href) => href === '/' ? path === '/' : href.includes('evidence') ? title === 'Evidence' : path.startsWith(href.split('?')[0]) && !(href === '/pekerjaan' && title === 'Evidence');
+%>
+  <!-- Sidebar desktop -->
+  <aside class="no-print fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-slate-200 bg-white md:flex">
+    <div class="px-5 py-5">
+      <a href="/" class="block text-xl font-bold tracking-tight text-blue-600">KERJAIN</a>
+      <p class="text-xs text-slate-500">Catat. Kerjakan. Buktikan.</p>
+    </div>
+    <div class="px-4 pb-3">
+      <button type="button" data-quick class="btn btn-primary w-full"><%- icon('plus', 'h-4 w-4') %> Catat Pekerjaan <kbd class="kbd" title="Tekan C untuk mencatat">C</kbd></button>
+    </div>
+    <nav class="flex-1 space-y-0.5 px-3">
+      <% nav.forEach(([href, label, ic]) => { %>
+        <a href="<%= href %>" class="nav-link <%= active(href) ? 'nav-active' : '' %>"><%- icon(ic) %><%= label %></a>
+      <% }) %>
+    </nav>
+    <div class="flex items-center gap-3 border-t border-slate-200 px-5 py-4 text-xs text-slate-500">
+      <span class="avatar"><%= (user.name || user.email).trim().charAt(0).toUpperCase() %></span>
+      <div class="min-w-0">
+        <div class="truncate font-medium text-slate-700"><%= user.name %></div>
+        <div class="truncate"><%= user.email %></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Top bar mobile -->
+  <header class="no-print sticky top-0 z-20 flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4 md:hidden">
+    <a href="/" class="text-lg font-bold tracking-tight text-blue-600">KERJAIN</a>
+    <div class="flex items-center gap-1">
+      <a href="/pekerjaan?evidence=1" class="icon-btn" aria-label="Evidence"><%- icon('folder') %></a>
+      <a href="/knowledge" class="icon-btn" aria-label="Knowledge Base"><%- icon('book') %></a>
+      <a href="/pengaturan" class="icon-btn" aria-label="Pengaturan"><%- icon('gear') %></a>
+    </div>
+  </header>
+<% } %>
+  <main class="<%= user ? 'md:pl-60' : '' %>">
+    <div class="mx-auto w-full max-w-5xl px-4 pb-28 pt-5 md:px-8 md:pb-12 md:pt-8">
+<% } else if (part === 'item') { %>
+  <a href="/pekerjaan/<%= p.id %>" class="tl-item">
+    <div class="tl-time"><%= p.waktu_mulai || '—' %></div>
+    <div class="tl-dot <%= p.status === 'Selesai' ? 'bg-green-600' : 'bg-amber-600' %>"></div>
+    <div class="min-w-0 flex-1">
+      <div class="truncate font-medium text-slate-900"><%= p.judul %></div>
+      <div class="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-slate-500">
+        <span><%= p.kategori %><%= p.subkategori ? ' · ' + p.subkategori : '' %></span>
+        <% if (p.pegawai) { %><span>· <%= p.pegawai %></span><% } %>
+        <% if (p.evidence) { %><span class="text-blue-600">· <%= p.evidence %> evidence</span><% } %>
+      </div>
+    </div>
+    <span class="badge <%= p.status === 'Selesai' ? 'badge-ok' : 'badge-warn' %>"><%= p.status %></span>
+  </a>
+<% } else if (part === 'upload') { %>
+  <div class="upload" data-upload>
+    <div class="grid grid-cols-2 gap-2">
+      <label class="btn btn-outline cursor-pointer"><%- icon('camera', 'h-4 w-4') %> Ambil Foto
+        <input type="file" accept="image/*" capture="environment" class="sr-only" data-files>
+      </label>
+      <label class="btn btn-outline cursor-pointer"><%- icon('file', 'h-4 w-4') %> Pilih File
+        <input type="file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt" class="sr-only" data-files>
+      </label>
+    </div>
+    <p class="drop-hint">atau seret file ke sini</p>
+    <ul class="file-list" data-file-list></ul>
+    <div class="upload-progress hidden" data-upload-progress>
+      <div class="flex justify-between text-xs text-slate-600"><span data-upload-label>Mengupload...</span><span data-upload-pct>0%</span></div>
+      <div class="progress-track"><div class="progress-fill" data-upload-bar></div></div>
+    </div>
+    <p class="hint">Foto, screenshot, PDF, atau dokumen Office, maksimal 10 MB per file. Foto dikompresi otomatis.</p>
+  </div>
+<% } else if (part === 'foot') { %>
+    </div>
+  </main>
+<% if (user) { %>
+  <!-- Navigasi bawah mobile -->
+  <nav class="no-print bottom-nav md:hidden">
+    <a href="/" class="<%= path === '/' ? 'text-blue-600' : '' %>"><%- icon('home') %><span>Beranda</span></a>
+    <a href="/pekerjaan" class="<%= path.startsWith('/pekerjaan') && title !== 'Evidence' ? 'text-blue-600' : '' %>"><%- icon('list') %><span>Pekerjaan</span></a>
+    <button type="button" data-quick class="fab" aria-label="Catat pekerjaan"><%- icon('plus', 'h-6 w-6') %></button>
+    <a href="/kalender" class="<%= path === '/kalender' ? 'text-blue-600' : '' %>"><%- icon('calendar') %><span>Kalender</span></a>
+    <a href="/laporan" class="<%= path === '/laporan' ? 'text-blue-600' : '' %>"><%- icon('report') %><span>Laporan</span></a>
+  </nav>
+
+  <!-- Quick log -->
+  <dialog id="quick" class="sheet no-print" aria-labelledby="quick-title">
+    <form id="quick-form" class="space-y-4" novalidate>
+      <div class="sheet-handle md:hidden" aria-hidden="true"></div>
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h2 id="quick-title" class="text-base font-semibold">Catat Pekerjaan</h2>
+          <p class="text-xs text-slate-500" data-quick-when></p>
+        </div>
+        <button type="button" data-close class="icon-btn -mr-2 -mt-1" aria-label="Tutup">✕</button>
+      </div>
+      <p class="notice notice-info hidden" data-quick-draft>Draf sebelumnya dipulihkan. <button type="button" class="font-medium underline" data-quick-clear>Kosongkan</button></p>
+      <div>
+        <label class="label" for="q-judul">Apa yang dikerjakan? <span class="text-red-600">*</span></label>
+        <input id="q-judul" name="judul" class="input" maxlength="200" placeholder="Contoh: Penanganan error SIPP" autocomplete="off" enterkeyhint="done" required data-counter>
+      </div>
+      <div>
+        <label class="label" for="q-kategori">Kategori</label>
+        <select id="q-kategori" name="kategori" class="input">
+          <% Object.keys(typeof kategoriMap === 'object' ? kategoriMap : {}).forEach((k) => { %><option><%= k %></option><% }) %>
+        </select>
+      </div>
+      <div>
+        <span class="label">Status</span>
+        <div class="segmented">
+          <% STATUS.forEach((s, i) => { %>
+            <label><input type="radio" name="status" value="<%= s %>" <%= i === 0 ? 'checked' : '' %>><span><%= s %></span></label>
+          <% }) %>
+        </div>
+      </div>
+      <div data-hasil>
+        <label class="label" for="q-hasil">Hasil <span class="font-normal text-slate-500">(opsional)</span></label>
+        <input id="q-hasil" name="hasil" class="input" maxlength="1000" placeholder="Contoh: SIPP kembali normal" autocomplete="off">
+      </div>
+      <button type="submit" class="btn btn-primary w-full">Simpan</button>
+      <div class="flex items-center justify-between text-sm">
+        <a href="/pekerjaan/baru" class="font-medium text-blue-600" data-quick-full>Isi form lengkap</a>
+        <span class="hidden text-xs text-slate-400 md:inline"><kbd class="kbd kbd-light">Ctrl</kbd> + <kbd class="kbd kbd-light">Enter</kbd> simpan</span>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Panduan pasang PWA untuk iPhone/iPad (Safari tidak punya tombol pasang otomatis) -->
+  <dialog id="install-ios" class="sheet no-print" aria-labelledby="install-title">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <img src="/apple-touch-icon.png" alt="" width="44" height="44" class="h-11 w-11 rounded-[10px] border border-slate-200">
+        <div>
+          <h2 id="install-title" class="text-base font-semibold">Pasang KERJAIN</h2>
+          <p class="text-xs text-slate-500">Buka langsung dari layar utama, seperti aplikasi.</p>
+        </div>
+      </div>
+      <button type="button" data-close class="icon-btn" aria-label="Tutup">✕</button>
+    </div>
+    <p class="mt-4 hidden rounded-md border border-amber-600/30 bg-amber-50 px-3 py-2 text-sm text-amber-800" data-install-inapp>
+      Buka halaman ini di <b>Safari</b> terlebih dahulu. Browser di dalam aplikasi lain tidak dapat memasang KERJAIN.
+    </p>
+    <ol class="install-steps">
+      <li>
+        <span class="install-num">1</span>
+        <div>
+          <p>Ketuk tombol <b>Bagikan</b> <span data-install-where>di bilah bawah Safari</span>.</p>
+          <span class="install-chip"><%- icon('share', 'h-4 w-4 text-blue-600') %> Bagikan</span>
+        </div>
+      </li>
+      <li>
+        <span class="install-num">2</span>
+        <div>
+          <p>Gulir ke bawah, lalu pilih <b>Tambahkan ke Layar Utama</b>.</p>
+          <span class="install-chip"><%- icon('addSquare', 'h-4 w-4') %> Tambahkan ke Layar Utama</span>
+        </div>
+      </li>
+      <li>
+        <span class="install-num">3</span>
+        <div>
+          <p>Ketuk <b>Tambah</b> di pojok kanan atas.</p>
+          <span class="install-chip"><img src="/apple-touch-icon.png" alt="" width="16" height="16" class="h-4 w-4 rounded"> KERJAIN</span>
+        </div>
+      </li>
+    </ol>
+    <p class="mt-4 rounded-md bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600">
+      Setelah terpasang, buka KERJAIN dari ikon di layar utama lalu masuk dengan Google sekali.
+    </p>
+    <button type="button" data-close class="btn btn-primary mt-4 w-full">Mengerti</button>
+  </dialog>
+  <script id="kategori-data" type="application/json"><%- JSON.stringify(typeof kategoriMap === 'object' ? kategoriMap : {}).replace(/</g, '\\u003c') %></script>
+
+  <!-- Dialog konfirmasi (pengganti confirm() bawaan browser) -->
+  <dialog id="confirm" class="dialog-sm no-print" aria-labelledby="confirm-title" aria-describedby="confirm-message">
+    <div class="flex gap-3">
+      <span class="confirm-icon" data-confirm-icon><%- icon('alert', 'h-5 w-5') %></span>
+      <div class="min-w-0">
+        <h2 id="confirm-title" class="text-base font-semibold" data-confirm-title>Konfirmasi</h2>
+        <p id="confirm-message" class="mt-1 text-sm leading-relaxed text-slate-600" data-confirm-message></p>
+      </div>
+    </div>
+    <div class="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <button type="button" class="btn btn-outline" data-confirm-cancel>Batal</button>
+      <button type="button" class="btn btn-danger" data-confirm-ok>Hapus</button>
+    </div>
+  </dialog>
+<% } %>
+  <div id="toasts" class="toasts no-print" aria-live="polite"></div>
+  <% (typeof scripts !== 'undefined' ? scripts : []).forEach((src) => { %><script src="<%= src %>"></script>
+  <% }) %><script src="/app.js?v=<%= ASSET_V.js %>"></script>
+</body>
+</html>
+<% } %>

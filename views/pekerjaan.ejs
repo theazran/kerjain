@@ -1,0 +1,327 @@
+<% if (mode === 'list' && partial) { %>
+<%# Potongan daftar untuk pencarian & muat lagi %>
+<% } else { %><%- include('layout', { part: 'head' }) %><% } %>
+
+<% if (mode === 'list') {
+  const groups = [];
+  items.forEach((p) => { const g = groups[groups.length - 1]; if (g && g.tanggal === p.tanggal) g.items.push(p); else groups.push({ tanggal: p.tanggal, items: [p] }); });
+  const active = Object.fromEntries(Object.entries(f).filter(([, v]) => v !== ''));
+  const qs = (n) => new URLSearchParams({ ...active, page: n, partial: 1 }).toString();
+  const without = (key) => { const o = { ...active }; delete o[key]; if (key === 'bulan') delete o.tahun; const q = new URLSearchParams(o).toString(); return '/pekerjaan' + (q ? '?' + q : ''); };
+  const chips = [
+    f.q && ['q', '"' + f.q + '"'],
+    f.kategori && ['kategori', f.kategori],
+    f.status && ['status', f.status],
+    f.bulan && ['bulan', BULAN[f.bulan - 1] + (f.tahun ? ' ' + f.tahun : '')],
+    !f.bulan && f.tahun && ['tahun', 'Tahun ' + f.tahun],
+    f.tanggal && ['tanggal', tglPanjang(f.tanggal)],
+  ].filter(Boolean);
+%>
+  <% if (!partial) { %>
+  <div class="page-head">
+    <div>
+      <h1 class="page-title"><%= title %></h1>
+      <p class="text-sm text-slate-500"><%= f.evidence ? 'Pekerjaan yang memiliki evidence di Google Drive.' : 'Timeline seluruh pekerjaan yang dicatat.' %></p>
+    </div>
+    <div class="flex gap-2">
+      <a href="/pekerjaan/rutin" class="btn btn-outline"><%- icon('repeat', 'h-4 w-4') %> Rutin</a>
+      <a href="/pekerjaan/baru" class="btn btn-primary"><%- icon('plus', 'h-4 w-4') %> Catat</a>
+    </div>
+  </div>
+
+  <form id="filter-form" class="card mb-4 space-y-3" action="/pekerjaan" method="get" role="search">
+    <div class="relative">
+      <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><%- icon('search', 'h-4 w-4') %></span>
+      <input type="search" name="q" value="<%= f.q %>" class="input pl-9 pr-10" placeholder="Cari pekerjaan, pegawai, SIPP, printer, tanggal..." data-search autocomplete="off" enterkeyhint="search" aria-label="Cari pekerjaan">
+      <span class="spinner absolute right-3 top-1/2 -mt-2 hidden text-blue-600" data-search-spin aria-hidden="true"></span>
+      <kbd class="kbd kbd-light absolute right-3 top-1/2 hidden -translate-y-1/2 md:inline-flex" data-search-kbd title="Tekan / untuk mencari">/</kbd>
+    </div>
+    <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <select name="kategori" class="input" aria-label="Kategori" data-filter>
+        <option value="">Semua kategori</option>
+        <% Object.keys(kategoriMap).forEach((k) => { %><option <%= f.kategori === k ? 'selected' : '' %>><%= k %></option><% }) %>
+      </select>
+      <select name="status" class="input" aria-label="Status" data-filter>
+        <option value="">Semua status</option>
+        <% STATUS.forEach((s) => { %><option <%= f.status === s ? 'selected' : '' %>><%= s %></option><% }) %>
+      </select>
+      <select name="bulan" class="input" aria-label="Bulan" data-filter>
+        <option value="">Semua bulan</option>
+        <% BULAN.forEach((b, i) => { %><option value="<%= i + 1 %>" <%= f.bulan === i + 1 ? 'selected' : '' %>><%= b %></option><% }) %>
+      </select>
+      <input name="tahun" class="input" inputmode="numeric" maxlength="4" placeholder="Tahun" value="<%= f.tahun %>" aria-label="Tahun" data-filter>
+    </div>
+    <% if (f.evidence) { %><input type="hidden" name="evidence" value="1"><% } %>
+    <% if (f.tanggal) { %><input type="hidden" name="tanggal" value="<%= f.tanggal %>"><% } %>
+  </form>
+
+  <div id="list" class="card" aria-live="polite">
+  <% } %>
+    <% if (pageNo === 1) { %>
+      <div class="mb-3 flex flex-wrap items-center gap-2">
+        <p class="text-xs text-slate-500" data-total><b class="font-semibold text-slate-700"><%= total %></b> pekerjaan<%= f.evidence ? ' dengan evidence' : '' %></p>
+        <% chips.forEach(([key, label]) => { %>
+          <a href="<%= without(key) %>" class="chip" aria-label="Hapus filter <%= label %>"><%= label %> <span aria-hidden="true">✕</span></a>
+        <% }) %>
+        <% if (chips.length > 1) { %><a href="/pekerjaan<%= f.evidence ? '?evidence=1' : '' %>" class="text-xs font-medium text-blue-600">Reset filter</a><% } %>
+      </div>
+    <% } %>
+    <% if (!items.length && pageNo === 1) { %>
+      <div class="empty">
+        <% if (f.q || f.kategori || f.status || f.bulan || f.tahun || f.tanggal) { %>
+          <span class="empty-icon"><%- icon('search', 'h-5 w-5') %></span>
+          <p class="font-medium text-slate-900">Tidak ada pekerjaan yang cocok.</p>
+          <p class="text-sm text-slate-500">Coba kata kunci atau filter lain.</p>
+        <% } else if (f.evidence) { %>
+          <span class="empty-icon"><%- icon('folder', 'h-5 w-5') %></span>
+          <p class="font-medium text-slate-900">Belum ada evidence.</p>
+          <p class="text-sm text-slate-500">Buka detail pekerjaan untuk mengunggah foto atau dokumen.</p>
+        <% } else { %>
+          <span class="empty-icon"><%- icon('list', 'h-5 w-5') %></span>
+          <p class="font-medium text-slate-900">Belum ada pekerjaan.</p>
+          <p class="text-sm text-slate-500">Catat pekerjaan pertama Anda.</p>
+          <button type="button" data-quick class="btn btn-primary mt-4"><%- icon('plus', 'h-4 w-4') %> Catat Pekerjaan</button>
+        <% } %>
+      </div>
+    <% } %>
+    <% groups.forEach((g) => { %>
+      <div class="day-group" data-date="<%= g.tanggal %>">
+        <h3 class="day-head"><%= hariNama(g.tanggal) %>, <%= tglPanjang(g.tanggal) %></h3>
+        <div class="timeline" data-items>
+          <% g.items.forEach((p) => { %><%- include('layout', { part: 'item', p }) %><% }) %>
+        </div>
+      </div>
+    <% }) %>
+    <% if (more) { %>
+      <button type="button" class="btn btn-outline mt-4 w-full" data-more="/pekerjaan?<%= qs(pageNo + 1) %>">Muat lebih banyak</button>
+    <% } %>
+  <% if (!partial) { %></div><% } %>
+<% } %>
+
+<% if (mode === 'form') { const edit = !!p.id; const subs = kategoriMap[p.kategori] || []; %>
+  <div class="page-head">
+    <div>
+      <a href="<%= edit ? '/pekerjaan/' + p.id : '/pekerjaan' %>" class="text-sm text-slate-500">← Kembali</a>
+      <h1 class="page-title"><%= edit ? 'Edit Pekerjaan' : 'Catat Pekerjaan' %></h1>
+    </div>
+  </div>
+
+  <form class="card space-y-5" data-form-pekerjaan data-guard <%- edit ? `data-id="${p.id}"` : '' %> novalidate>
+    <div class="form-grid">
+      <div class="md:col-span-2">
+        <label class="label" for="f-judul">Judul Pekerjaan <span class="text-red-600">*</span></label>
+        <input id="f-judul" name="judul" class="input" maxlength="200" value="<%= p.judul || '' %>" placeholder="Contoh: Penanganan Error SIPP" required data-counter>
+      </div>
+      <div>
+        <label class="label" for="f-kategori">Kategori <span class="text-red-600">*</span></label>
+        <select id="f-kategori" name="kategori" class="input" data-kategori>
+          <% Object.keys(kategoriMap).forEach((k) => { %><option <%= p.kategori === k ? 'selected' : '' %>><%= k %></option><% }) %>
+        </select>
+      </div>
+      <div>
+        <label class="label" for="f-sub">Subkategori</label>
+        <select id="f-sub" name="subkategori" class="input" data-subkategori data-value="<%= p.subkategori || '' %>">
+          <option value="">—</option>
+          <% subs.forEach((s) => { %><option <%= p.subkategori === s ? 'selected' : '' %>><%= s %></option><% }) %>
+        </select>
+      </div>
+      <div>
+        <label class="label" for="f-tanggal">Tanggal</label>
+        <input id="f-tanggal" type="date" name="tanggal" class="input" value="<%= edit ? p.tanggal : (p.tanggal || '') %>" data-today="<%= edit ? '' : '1' %>">
+      </div>
+      <div>
+        <div class="grid grid-cols-2 gap-3" data-duration>
+          <div>
+            <div class="label-row"><label class="label" for="f-mulai">Mulai</label><button type="button" class="link-btn" data-now-for="f-mulai">Sekarang</button></div>
+            <input id="f-mulai" type="time" name="waktu_mulai" class="input" value="<%= p.waktu_mulai || '' %>">
+          </div>
+          <div>
+            <div class="label-row"><label class="label" for="f-selesai">Selesai</label><button type="button" class="link-btn" data-now-for="f-selesai">Sekarang</button></div>
+            <input id="f-selesai" type="time" name="waktu_selesai" class="input" value="<%= p.waktu_selesai || '' %>">
+          </div>
+        </div>
+        <p class="hint flex items-center gap-1" data-duration-label><%- icon('clock', 'h-3.5 w-3.5') %> <span></span></p>
+      </div>
+      <div class="md:col-span-2">
+        <label class="label" for="f-uraian">Uraian Pekerjaan</label>
+        <textarea id="f-uraian" name="uraian" rows="3" class="input" maxlength="3000"><%= p.uraian || '' %></textarea>
+      </div>
+      <div class="md:col-span-2">
+        <span class="label">Status</span>
+        <div class="segmented">
+          <% STATUS.forEach((s) => { %>
+            <label><input type="radio" name="status" value="<%= s %>" <%= (p.status || 'Selesai') === s ? 'checked' : '' %>><span><%= s %></span></label>
+          <% }) %>
+        </div>
+      </div>
+      <div class="md:col-span-2 <%= (p.status || 'Selesai') === 'Selesai' ? '' : 'hidden' %>" data-hasil>
+        <label class="label" for="f-hasil">Hasil</label>
+        <textarea id="f-hasil" name="hasil" rows="2" class="input" maxlength="1000" placeholder="Contoh: SIPP kembali normal"><%= p.hasil || '' %></textarea>
+      </div>
+    </div>
+
+    <details class="detail-box" data-extra <%= (p.masalah || p.tindakan || p.pegawai || p.kategori === 'Bantuan Pegawai') ? 'open' : '' %>>
+      <summary>Masalah, tindakan &amp; pegawai yang dibantu <span class="font-normal text-slate-500">(opsional)</span></summary>
+      <div class="form-grid mt-4">
+        <div>
+          <label class="label" for="f-pegawai">Pegawai yang Dibantu</label>
+          <input id="f-pegawai" name="pegawai" class="input" maxlength="120" list="pegawai-list" value="<%= p.pegawai || '' %>" autocomplete="off">
+          <datalist id="pegawai-list"><% pegawaiList.forEach((n) => { %><option value="<%= n %>"><% }) %></datalist>
+        </div>
+        <div>
+          <label class="label" for="f-jenis">Jenis Pekerjaan</label>
+          <select id="f-jenis" name="jenis" class="input">
+            <option value="">Otomatis</option>
+            <% JENIS.forEach((j) => { %><option <%= p.jenis === j ? 'selected' : '' %>><%= j %></option><% }) %>
+          </select>
+        </div>
+        <div class="md:col-span-2">
+          <label class="label" for="f-masalah">Masalah / Kendala</label>
+          <input id="f-masalah" name="masalah" class="input" maxlength="1000" list="masalah-list" value="<%= p.masalah || '' %>" placeholder="Contoh: SIPP tidak dapat dibuka" autocomplete="off">
+          <datalist id="masalah-list"><% masalahList.forEach((m) => { %><option value="<%= m %>"><% }) %></datalist>
+          <p class="hint">Pilih dari saran agar masalah yang sama terkelompok di statistik.</p>
+        </div>
+        <div class="md:col-span-2">
+          <label class="label" for="f-tindakan">Tindakan</label>
+          <textarea id="f-tindakan" name="tindakan" rows="3" class="input" maxlength="2000"><%= p.tindakan || '' %></textarea>
+        </div>
+      </div>
+    </details>
+
+    <div class="detail-box">
+      <span class="label">Evidence <span class="font-normal text-slate-500">(opsional)</span></span>
+      <%- include('layout', { part: 'upload' }) %>
+    </div>
+
+    <div class="form-actions">
+      <a href="<%= edit ? '/pekerjaan/' + p.id : '/pekerjaan' %>" class="btn btn-outline">Batal</a>
+      <button type="submit" class="btn btn-primary"><%= edit ? 'Simpan Perubahan' : 'Simpan' %></button>
+    </div>
+  </form>
+<% } %>
+
+<% if (mode === 'detail') { const lama = durasi(p.waktu_mulai, p.waktu_selesai); %>
+  <nav class="breadcrumb" aria-label="Navigasi">
+    <a href="/pekerjaan">Pekerjaan</a><span aria-hidden="true">/</span><span class="truncate text-slate-700"><%= p.id %></span>
+  </nav>
+  <div class="grid gap-6 lg:grid-cols-3">
+    <article class="card lg:col-span-2">
+      <div class="mb-4 flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <h1 class="text-xl font-semibold leading-snug"><%= p.judul %></h1>
+          <div class="meta-row mt-2">
+            <span><%- icon('calendar', 'h-4 w-4') %><%= hariNama(p.tanggal) %>, <%= tglPanjang(p.tanggal) %></span>
+            <% if (p.waktu_mulai) { %><span><%- icon('clock', 'h-4 w-4') %><%= p.waktu_mulai %><%= p.waktu_selesai ? ' – ' + p.waktu_selesai : '' %><%= lama ? ' (' + lama + ')' : '' %></span><% } %>
+            <span><%- icon('list', 'h-4 w-4') %><%= p.kategori %><%= p.subkategori ? ' · ' + p.subkategori : '' %></span>
+          </div>
+        </div>
+        <span class="badge badge-lg <%= p.status === 'Selesai' ? 'badge-ok' : 'badge-warn' %>"><span class="badge-dot"></span><%= p.status %></span>
+      </div>
+
+      <% if (p.status === 'Berjalan') { %>
+        <div class="notice notice-warn mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <span>Pekerjaan ini masih berjalan. Tandai selesai setelah dikerjakan dan catat hasilnya.</span>
+          <button type="button" class="btn btn-primary btn-sm shrink-0" data-open="#selesai-dialog"><%- icon('check', 'h-4 w-4') %> Tandai Selesai</button>
+        </div>
+      <% } %>
+
+      <dl class="detail-list">
+        <% [['Uraian', p.uraian], ['Pegawai yang Dibantu', p.pegawai], ['Masalah', p.masalah], ['Tindakan', p.tindakan], ['Hasil', p.hasil], ['Jenis Pekerjaan', p.jenis]].forEach(([label, val]) => { if (!val) return; %>
+          <div><dt><%= label %></dt><dd><%= val %></dd></div>
+        <% }) %>
+        <% if (!p.uraian && !p.masalah && !p.tindakan && !p.hasil) { %>
+          <div class="notice notice-info">Belum ada uraian. <a class="font-medium underline" href="/pekerjaan/<%= p.id %>/edit">Lengkapi detail</a> agar laporan lebih jelas.</div>
+        <% } %>
+      </dl>
+      <p class="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500">
+        <button type="button" class="link-btn inline-flex items-center gap-1 text-slate-500" data-copy="<%= p.id %>" title="Salin ID"><%- icon('copy', 'h-3.5 w-3.5') %><%= p.id %></button>
+        <span>· Diperbarui <%= p.updated_at %></span>
+      </p>
+      <div class="mt-5 flex flex-wrap gap-2 border-t border-slate-200 pt-4">
+        <a href="/pekerjaan/<%= p.id %>/edit" class="btn btn-outline"><%- icon('edit', 'h-4 w-4') %> Edit</a>
+        <a href="/pekerjaan/baru?template=<%= encodeURIComponent(p.id) %>" class="btn btn-outline"><%- icon('repeat', 'h-4 w-4') %> Gunakan sebagai Template</a>
+        <% if (p.masalah) { %><a href="/knowledge?dari=<%= encodeURIComponent(p.id) %>#form" class="btn btn-outline"><%- icon('book', 'h-4 w-4') %> Jadikan Knowledge Base</a><% } %>
+        <button type="button" class="btn btn-danger-outline sm:ml-auto" data-delete="/api/pekerjaan/<%= p.id %>" data-redirect="/pekerjaan"
+          data-confirm-title="Hapus pekerjaan?" data-confirm="“<%= p.judul %>” akan dihapus dari spreadsheet. Folder evidence di Google Drive tidak ikut dihapus."><%- icon('trash', 'h-4 w-4') %> Hapus</button>
+      </div>
+    </article>
+
+    <section class="card self-start" data-evidence="<%= p.id %>" data-has-folder="<%= p.drive_folder_url ? '1' : '' %>">
+      <div class="card-head">
+        <h2 class="card-title">Evidence <span class="count" data-evidence-count><%= p.evidence || '' %></span></h2>
+        <a href="<%= p.drive_folder_url || '#' %>" target="_blank" rel="noopener" class="text-sm font-medium text-blue-600 <%= p.drive_folder_url ? '' : 'hidden' %>" data-evidence-folder>Buka Google Drive</a>
+      </div>
+      <ul class="evidence-list mb-4" data-evidence-list>
+        <% if (p.drive_folder_url) { %>
+          <% for (let i = 0; i < Math.min(Math.max(p.evidence, 1), 3); i++) { %><li class="flex items-center gap-3 p-2"><span class="skeleton h-9 w-9"></span><span class="flex-1 space-y-1.5"><span class="skeleton block h-3 w-3/4"></span><span class="skeleton block h-2.5 w-1/3"></span></span></li><% } %>
+        <% } else { %>
+          <li class="empty py-5"><span class="empty-icon"><%- icon('folder', 'h-5 w-5') %></span><p class="text-sm text-slate-500">Belum ada evidence.</p></li>
+        <% } %>
+      </ul>
+      <form data-upload-form="<%= p.id %>">
+        <%- include('layout', { part: 'upload' }) %>
+        <button type="submit" class="btn btn-primary mt-3 w-full" data-upload-submit disabled><%- icon('upload', 'h-4 w-4') %> Upload Evidence</button>
+      </form>
+    </section>
+  </div>
+
+  <% if (p.status === 'Berjalan') { %>
+  <dialog id="selesai-dialog" class="sheet no-print" aria-labelledby="selesai-title">
+    <form class="space-y-4" data-selesai-form="<%= p.id %>" novalidate>
+      <div class="sheet-handle md:hidden" aria-hidden="true"></div>
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h2 id="selesai-title" class="text-base font-semibold">Tandai Selesai</h2>
+          <p class="text-xs text-slate-500 line-clamp-1"><%= p.judul %></p>
+        </div>
+        <button type="button" data-close class="icon-btn -mr-2 -mt-1" aria-label="Tutup">✕</button>
+      </div>
+      <div>
+        <label class="label" for="s-hasil">Hasil</label>
+        <textarea id="s-hasil" name="hasil" rows="3" class="input" maxlength="1000" placeholder="Contoh: Printer kembali dapat mencetak"><%= p.hasil || '' %></textarea>
+      </div>
+      <div>
+        <div class="label-row"><label class="label" for="s-waktu">Waktu Selesai</label><button type="button" class="link-btn" data-now-for="s-waktu">Sekarang</button></div>
+        <input id="s-waktu" type="time" name="waktu_selesai" class="input" value="<%= p.waktu_selesai || '' %>" data-now="1">
+      </div>
+      <button type="submit" class="btn btn-primary w-full"><%- icon('check', 'h-4 w-4') %> Simpan sebagai Selesai</button>
+    </form>
+  </dialog>
+  <% } %>
+<% } %>
+
+<% if (mode === 'rutin') { %>
+  <div class="page-head">
+    <div>
+      <a href="/pekerjaan" class="text-sm text-slate-500">← Pekerjaan</a>
+      <h1 class="page-title">Pekerjaan Rutin</h1>
+      <p class="text-sm text-slate-500">Pilih pekerjaan rutin yang sudah dilakukan, lalu catat sekaligus.</p>
+    </div>
+  </div>
+  <form class="card space-y-4" data-rutin-form>
+    <% if (rutin.length) { %>
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-slate-600" data-rutin-count>Belum ada yang dipilih</span>
+        <button type="button" class="link-btn" data-rutin-all>Pilih semua</button>
+      </div>
+      <div class="divide-y divide-slate-100 rounded-md border border-slate-200 px-3">
+        <% rutin.forEach((r) => { %>
+          <label class="check-row">
+            <input type="checkbox" name="ids" value="<%= r.id %>" class="h-5 w-5 rounded border-slate-300 text-blue-600 accent-blue-600">
+            <span class="flex-1"><span class="block font-medium"><%= r.judul %></span><span class="text-xs text-slate-500"><%= r.kategori %><%= r.subkategori ? ' · ' + r.subkategori : '' %></span></span>
+          </label>
+        <% }) %>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label class="label" for="r-tgl">Tanggal</label><input id="r-tgl" type="date" name="tanggal" class="input" data-today="1"></div>
+        <div><label class="label" for="r-waktu">Waktu</label><input id="r-waktu" type="time" name="waktu" class="input" data-now="1"></div>
+      </div>
+      <button type="submit" class="btn btn-primary w-full" data-rutin-submit disabled>Catat yang Dipilih</button>
+    <% } else { %>
+      <div class="empty"><span class="empty-icon"><%- icon('repeat', 'h-5 w-5') %></span><p class="font-medium">Belum ada pekerjaan rutin.</p><p class="text-sm text-slate-500">Tambahkan di halaman Pengaturan.</p></div>
+    <% } %>
+    <a href="/pengaturan#rutin" class="block text-center text-sm font-medium text-blue-600">Kelola daftar pekerjaan rutin</a>
+  </form>
+<% } %>
+
+<% if (!(mode === 'list' && partial)) { %><%- include('layout', { part: 'foot' }) %><% } %>

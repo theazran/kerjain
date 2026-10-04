@@ -1,0 +1,26 @@
+<%- include('layout', { part: 'head', scripts: ['/vendor/fullcalendar.js', '/vendor/fullcalendar-id.js'] }) %>
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Kalender</h1>
+    <p class="text-sm text-slate-500">Klik tanggal untuk melihat pekerjaan pada hari itu.</p>
+  </div>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <section class="card lg:col-span-2 p-2 sm:p-4">
+    <div id="calendar" class="kalender"></div>
+  </section>
+  <section class="card" id="day-panel" data-today="<%= hariIni %>">
+    <div class="card-head">
+      <div>
+        <h2 class="card-title" data-day-label><%= tglPanjang(hariIni) %></h2>
+        <p class="text-xs text-slate-500" data-day-count></p>
+      </div>
+      <a href="/pekerjaan/baru?tanggal=<%= hariIni %>" class="text-sm font-medium text-blue-600" data-day-add>+ Catat</a>
+    </div>
+    <div class="timeline" data-day-list><p class="text-sm text-slate-500">Memuat...</p></div>
+  </section>
+</div>
+
+<%- include('layout', { part: 'foot', scripts: ['/vendor/fullcalendar.js', '/vendor/fullcalendar-id.js'] }) %>

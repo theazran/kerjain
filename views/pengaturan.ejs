@@ -1,0 +1,76 @@
+<%- include('layout', { part: 'head' }) %>
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Pengaturan</h1>
+    <p class="text-sm text-slate-500">Data ini digunakan pada kop dan identitas laporan.</p>
+  </div>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <form class="card space-y-4 lg:col-span-2" data-settings-form>
+    <h2 class="card-title">Profil &amp; Instansi</h2>
+    <div class="form-grid">
+      <% fields.forEach(([key, label]) => { %>
+        <div class="<%= key === 'nama_instansi' ? 'md:col-span-2' : '' %>">
+          <label class="label" for="s-<%= key %>"><%= label %></label>
+          <input id="s-<%= key %>" name="<%= key %>" class="input" maxlength="150" value="<%= settings[key] %>"
+            <%- key === 'tahun' ? 'inputmode="numeric" maxlength="4"' : key === 'nip' ? 'inputmode="numeric"' : '' %>
+            placeholder="<%= { nama_instansi: 'Contoh: Pengadilan Negeri Bulukumba', unit: 'Contoh: Umum dan Keuangan', tahun: hariIni.slice(0, 4) }[key] || '' %>">
+        </div>
+      <% }) %>
+    </div>
+    <div class="flex justify-end"><button type="submit" class="btn btn-primary w-full sm:w-auto">Simpan Pengaturan</button></div>
+  </form>
+
+  <section class="card">
+    <h2 class="card-title mb-4">Integrasi Google</h2>
+    <dl class="space-y-3 text-sm">
+      <div><dt class="text-slate-500">Google Account</dt><dd class="break-all font-medium"><%= google.email %></dd></div>
+      <div class="flex items-center justify-between"><dt>Google Drive</dt><dd class="font-medium text-green-600">✓ Terhubung</dd></div>
+      <div class="flex items-center justify-between"><dt>Google Sheets</dt><dd class="font-medium text-green-600">✓ Terhubung</dd></div>
+    </dl>
+    <div class="mt-4 space-y-2">
+      <a href="<%= google.sheetUrl %>" target="_blank" rel="noopener" class="btn btn-outline w-full">Buka Spreadsheet</a>
+      <% if (google.folderUrl) { %><a href="<%= google.folderUrl %>" target="_blank" rel="noopener" class="btn btn-outline w-full">Buka Folder Evidence</a><% } %>
+      <form method="post" action="/keluar"><button class="btn btn-danger-outline w-full">Putuskan &amp; Keluar</button></form>
+    </div>
+  </section>
+
+  <section class="card space-y-4 lg:col-span-2" id="rutin">
+    <h2 class="card-title">Daftar Pekerjaan Rutin</h2>
+    <% if (rutin.length) { %>
+      <ul class="divide-y divide-slate-100 text-sm">
+        <% rutin.forEach((r) => { %>
+          <li class="flex items-center justify-between gap-3 py-2">
+            <span><span class="font-medium"><%= r.judul %></span> <span class="text-slate-500">· <%= r.kategori %><%= r.subkategori ? ' / ' + r.subkategori : '' %></span></span>
+            <button type="button" class="btn btn-danger-outline btn-sm" data-delete="/api/rutin/<%= r.id %>" data-confirm="Hapus pekerjaan rutin ini dari daftar?">Hapus</button>
+          </li>
+        <% }) %>
+      </ul>
+    <% } else { %><p class="text-sm text-slate-500">Belum ada pekerjaan rutin.</p><% } %>
+    <form class="grid gap-2 sm:grid-cols-4" data-rutin-add>
+      <input name="judul" class="input sm:col-span-2" maxlength="200" placeholder="Nama pekerjaan rutin" aria-label="Nama pekerjaan rutin">
+      <select name="kategori" class="input" aria-label="Kategori">
+        <% Object.keys(kategoriMap).forEach((k) => { %><option><%= k %></option><% }) %>
+      </select>
+      <button type="submit" class="btn btn-primary">Tambah</button>
+    </form>
+  </section>
+
+  <section class="card text-sm text-slate-600">
+    <h2 class="card-title mb-2">Aplikasi</h2>
+    <div class="flex items-center gap-3">
+      <img src="/apple-touch-icon.png" alt="" width="44" height="44" class="h-11 w-11 shrink-0 rounded-[10px] border border-slate-200">
+      <p data-install-status>Pasang KERJAIN di layar utama HP atau komputer agar dapat dibuka seperti aplikasi.</p>
+    </div>
+    <button type="button" class="btn btn-outline mt-4 w-full" data-install><%- icon('phone', 'h-4 w-4') %> Pasang Aplikasi</button>
+  </section>
+
+  <section class="card text-sm text-slate-600">
+    <h2 class="card-title mb-2">Kategori</h2>
+    <p>Kategori dan subkategori diambil dari sheet <b>kategori</b> pada spreadsheet. Tambahkan baris baru di sheet tersebut untuk menambah pilihan.</p>
+  </section>
+</div>
+
+<%- include('layout', { part: 'foot' }) %>

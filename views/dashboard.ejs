@@ -1,0 +1,133 @@
+<%- include('layout', { part: 'head' }) %>
+<% const persen = stat.total ? Math.round((stat.selesai / stat.total) * 100) : 0; const maxBantuan = bantuan.length ? bantuan[0].total : 1; %>
+
+<div class="install-banner hidden" data-install-banner>
+  <img src="/apple-touch-icon.png" alt="" width="44" height="44" class="h-11 w-11 shrink-0 rounded-[10px] border border-slate-200">
+  <div class="min-w-0 flex-1">
+    <p class="text-sm font-semibold text-slate-900">Pasang KERJAIN di layar utama</p>
+    <p class="text-xs text-slate-600">Buka lebih cepat dan catat pekerjaan dengan satu ketukan.</p>
+  </div>
+  <div class="flex shrink-0 items-center gap-1">
+    <button type="button" class="btn btn-primary btn-sm" data-install>Pasang</button>
+    <button type="button" class="icon-btn h-9 w-9" data-install-dismiss aria-label="Nanti saja">✕</button>
+  </div>
+</div>
+
+<section class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <h1 class="text-2xl font-bold tracking-tight text-blue-600">KERJAIN</h1>
+    <p class="text-sm text-slate-600">Catat. Kerjakan. Buktikan.</p>
+    <p class="mt-3 text-base font-semibold text-slate-900" data-greeting data-name="<%= namaSapaan %>">Selamat datang<%= namaSapaan ? ', ' + namaSapaan : '' %></p>
+    <p class="text-sm text-slate-600"><%= hariNama(hariIni) %>, <%= tglPanjang(hariIni) %></p>
+  </div>
+  <button type="button" data-quick class="btn btn-primary w-full sm:w-auto"><%- icon('plus', 'h-4 w-4') %> Catat Pekerjaan</button>
+</section>
+
+<section aria-label="Ringkasan bulan ini" class="mb-6">
+  <p class="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500"><%= namaBulan %></p>
+  <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
+    <a href="/pekerjaan?bulan=<%= Number(hariIni.slice(5,7)) %>&tahun=<%= hariIni.slice(0,4) %>" class="card stat">
+      <span class="stat-icon bg-slate-100 text-slate-600"><%- icon('list', 'h-4 w-4') %></span>
+      <span class="stat-num"><%= stat.total %></span><span class="stat-label">Pekerjaan</span>
+    </a>
+    <a href="/pekerjaan?status=Selesai&bulan=<%= Number(hariIni.slice(5,7)) %>&tahun=<%= hariIni.slice(0,4) %>" class="card stat">
+      <span class="stat-icon bg-green-50 text-green-600"><%- icon('checkCircle', 'h-4 w-4') %></span>
+      <span class="stat-num"><%= stat.selesai %></span><span class="stat-label">Selesai</span>
+    </a>
+    <a href="/pekerjaan?status=Berjalan" class="card stat">
+      <span class="stat-icon bg-amber-50 text-amber-600"><%- icon('clock', 'h-4 w-4') %></span>
+      <span class="stat-num"><%= stat.berjalan %></span><span class="stat-label">Berjalan</span>
+    </a>
+    <a href="/pekerjaan?evidence=1" class="card stat">
+      <span class="stat-icon bg-blue-50 text-blue-600"><%- icon('folder', 'h-4 w-4') %></span>
+      <span class="stat-num"><%= stat.evidence %></span><span class="stat-label">Evidence</span>
+    </a>
+  </div>
+  <% if (stat.total) { %>
+    <div class="card mt-3 py-3 md:py-3">
+      <div class="flex items-center justify-between text-sm">
+        <span class="text-slate-600">Penyelesaian bulan ini</span>
+        <span class="font-semibold tabular-nums"><%= persen %>%</span>
+      </div>
+      <div class="progress-track mt-2" role="progressbar" aria-valuenow="<%= persen %>" aria-valuemin="0" aria-valuemax="100" aria-label="Persentase pekerjaan selesai">
+        <div class="progress-fill bg-green-600" style="width: <%= persen %>%"></div>
+      </div>
+    </div>
+  <% } %>
+</section>
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="min-w-0 space-y-6 lg:col-span-2">
+    <section class="card">
+      <div class="card-head">
+        <h2 class="card-title">Pekerjaan Hari Ini <% if (hariIniList.length) { %><span class="count"><%= hariIniList.length %></span><% } %></h2>
+        <a href="/pekerjaan" class="text-sm font-medium text-blue-600">Lihat Semua</a>
+      </div>
+      <% if (hariIniList.length) { %>
+        <div class="timeline">
+          <% hariIniList.forEach((p) => { %><%- include('layout', { part: 'item', p }) %><% }) %>
+        </div>
+      <% } else { %>
+        <div class="empty">
+          <span class="empty-icon"><%- icon('plus', 'h-5 w-5') %></span>
+          <p class="font-medium text-slate-900"><%= kosong ? 'Belum ada pekerjaan.' : 'Belum ada pekerjaan hari ini.' %></p>
+          <p class="text-sm text-slate-500"><%= kosong ? 'Catat pekerjaan pertama Anda.' : 'Catat pekerjaan yang sedang Anda kerjakan.' %></p>
+          <button type="button" data-quick class="btn btn-primary mt-4"><%- icon('plus', 'h-4 w-4') %> Catat Pekerjaan</button>
+        </div>
+      <% } %>
+    </section>
+
+    <% if (berjalanList.length) { %>
+      <section class="card">
+        <div class="card-head">
+          <h2 class="card-title">Masih Berjalan <span class="count count-warn"><%= totalBerjalan %></span></h2>
+          <a href="/pekerjaan?status=Berjalan" class="text-sm font-medium text-blue-600">Lihat Semua</a>
+        </div>
+        <p class="-mt-1 mb-2 text-xs text-slate-500">Pekerjaan dari hari sebelumnya yang belum ditandai selesai.</p>
+        <ul class="divide-y divide-slate-100">
+          <% berjalanList.forEach((p) => { %>
+            <li>
+              <a href="/pekerjaan/<%= p.id %>" class="flex items-center gap-3 py-2.5 hover:text-blue-600">
+                <span class="tl-dot bg-amber-600 ring-0"></span>
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-sm font-medium"><%= p.judul %></span>
+                  <span class="text-xs text-slate-500"><%= tglPanjang(p.tanggal) %> · <%= p.kategori %></span>
+                </span>
+                <span class="text-xs font-medium text-blue-600">Selesaikan</span>
+              </a>
+            </li>
+          <% }) %>
+        </ul>
+      </section>
+    <% } %>
+  </div>
+
+  <div class="min-w-0 space-y-6">
+    <section class="card">
+      <div class="card-head"><h2 class="card-title">Pekerjaan Rutin</h2></div>
+      <p class="mb-3 text-sm text-slate-600">Catat monitoring, backup, dan pemeriksaan harian dengan sekali pilih.</p>
+      <a href="/pekerjaan/rutin" class="btn btn-outline w-full"><%- icon('repeat', 'h-4 w-4') %> Buka Pekerjaan Rutin</a>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2 class="card-title">Bantuan Pegawai</h2>
+        <a href="/pekerjaan?kategori=Bantuan%20Pegawai" class="text-sm font-medium text-blue-600">Lihat</a>
+      </div>
+      <% if (bantuan.length) { %>
+        <ul class="space-y-3 text-sm">
+          <% bantuan.forEach((b) => { %>
+            <li>
+              <div class="flex justify-between"><span class="text-slate-700"><%= b.label %></span><span class="font-semibold tabular-nums"><%= b.total %></span></div>
+              <div class="progress-track mt-1 h-1.5"><div class="progress-fill" style="width: <%= Math.max(4, Math.round(b.total / maxBantuan * 100)) %>%"></div></div>
+            </li>
+          <% }) %>
+        </ul>
+      <% } else { %>
+        <p class="text-sm text-slate-500">Belum ada bantuan pegawai bulan ini.</p>
+      <% } %>
+    </section>
+  </div>
+</div>
+
+<%- include('layout', { part: 'foot' }) %>

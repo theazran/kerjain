@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>KERJAIN - Catat. Kerjakan. Buktikan.</title>
+  <meta name="description" content="KERJAIN adalah aplikasi logbook pekerjaan digital untuk mencatat, mendokumentasikan, memantau, dan melaporkan aktivitas pekerjaan secara terstruktur.">
+  <meta name="theme-color" content="#FFFFFF">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/app.css?v=<%= ASSET_V.css %>">
+</head>
+<body class="landing bg-slate-50 text-slate-900 antialiased">
+<%
+  const fitur = [
+    ['list', 'Log Pekerjaan', 'Catat pekerjaan harian lengkap dengan tanggal, waktu, kategori, uraian, tindakan, dan hasil.'],
+    ['folder', 'Evidence', 'Simpan dokumentasi pekerjaan seperti foto, screenshot, PDF, dan dokumen.'],
+    ['calendar', 'Kalender', 'Lihat aktivitas pekerjaan berdasarkan tanggal melalui kalender.'],
+    ['chart', 'Statistik', 'Pantau jumlah pekerjaan, status pekerjaan, kategori, dan aktivitas secara ringkas.'],
+    ['report', 'Laporan', 'Gunakan data pekerjaan untuk membantu penyusunan laporan aktivitas secara terstruktur.'],
+    ['book', 'Knowledge Base', 'Simpan catatan solusi dan pengetahuan teknis untuk membantu menangani masalah yang berulang.'],
+  ];
+  const langkah = [
+    ['Catat', 'Masukkan pekerjaan yang dilakukan.'],
+    ['Kerjakan', 'Dokumentasikan tindakan dan hasil pekerjaan.'],
+    ['Buktikan', 'Tambahkan evidence pekerjaan.'],
+    ['Lapor', 'Gunakan data yang sudah tercatat untuk laporan dan monitoring.'],
+  ];
+  const google = [
+    ['table', 'Google Sheets', 'Data logbook dapat disimpan dan dikelola menggunakan Google Sheets sebagai media penyimpanan data.'],
+    ['folder', 'Google Drive', 'Evidence pekerjaan dapat disimpan di Google Drive sehingga dokumentasi pekerjaan dapat dikelola secara terstruktur.'],
+    ['lock', 'Google OAuth', 'KERJAIN menggunakan Google OAuth untuk proses autentikasi pengguna.'],
+  ];
+  const keamanan = [
+    'Akses aplikasi menggunakan autentikasi.',
+    'Data pekerjaan hanya dapat diakses oleh pengguna yang memiliki izin.',
+    'Credential Google tidak ditampilkan di halaman aplikasi.',
+    'Token autentikasi tidak ditampilkan kepada pengguna lain.',
+    'Evidence disimpan menggunakan Google Drive sesuai konfigurasi aplikasi.',
+  ];
+%>
+  <header class="sticky top-0 z-20 border-b border-slate-200 bg-white">
+    <div class="lp-wrap flex h-14 items-center justify-between">
+      <a href="/" class="text-lg font-bold tracking-tight text-blue-600">KERJAIN</a>
+      <nav class="flex items-center gap-1" aria-label="Navigasi">
+        <a href="#fitur" class="lp-nav">Fitur</a>
+        <a href="#cara-kerja" class="lp-nav">Cara Kerja</a>
+        <a href="#integrasi" class="lp-nav">Integrasi Google</a>
+        <a href="/auth/google" class="btn btn-primary btn-sm ml-2">Masuk</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="border-b border-slate-200 bg-white">
+      <div class="lp-wrap grid items-center gap-10 py-10 md:grid-cols-2 md:py-20">
+        <div>
+          <h1 class="text-3xl font-bold tracking-tight text-blue-600 md:text-5xl">KERJAIN</h1>
+          <p class="mt-2 text-lg font-semibold text-slate-900 md:text-xl">Catat. Kerjakan. Buktikan.</p>
+          <p class="mt-4 max-w-xl text-base leading-relaxed text-slate-600">
+            Kelola dan dokumentasikan aktivitas pekerjaan harian secara lebih terstruktur. Catat pekerjaan, simpan evidence, pantau aktivitas, dan buat laporan dengan lebih mudah.
+          </p>
+          <div class="mt-6 flex flex-col gap-2 sm:flex-row">
+            <a href="/auth/google" class="btn btn-primary w-full sm:w-auto"><%- icon('lock', 'h-4 w-4') %> Masuk dengan Google</a>
+            <a href="#fitur" class="btn btn-outline w-full sm:w-auto">Pelajari KERJAIN</a>
+          </div>
+        </div>
+
+        <!-- Gambaran tampilan aplikasi (contoh data) -->
+        <div class="hidden md:block" aria-hidden="true">
+          <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <div class="mb-3 grid grid-cols-3 gap-2">
+              <div class="rounded-md border border-slate-200 bg-white p-3"><div class="text-xl font-semibold">32</div><div class="text-xs text-slate-500">Pekerjaan</div></div>
+              <div class="rounded-md border border-slate-200 bg-white p-3"><div class="text-xl font-semibold text-green-600">24</div><div class="text-xs text-slate-500">Selesai</div></div>
+              <div class="rounded-md border border-slate-200 bg-white p-3"><div class="text-xl font-semibold text-blue-600">29</div><div class="text-xs text-slate-500">Evidence</div></div>
+            </div>
+            <div class="rounded-md border border-slate-200 bg-white p-4">
+              <div class="mb-2 text-sm font-semibold">Pekerjaan Hari Ini</div>
+              <% [['10:15', 'Penanganan Error Aplikasi', 'IT', 'Selesai'], ['11:30', 'Perbaikan Printer', 'IT', 'Selesai'], ['13:30', 'Monitoring Server', 'IT', 'Berjalan']].forEach(([t, j, k, s]) => { %>
+                <div class="flex items-center gap-3 border-t border-slate-100 py-2.5 first-of-type:border-0">
+                  <span class="w-11 text-sm font-medium tabular-nums text-slate-600"><%= t %></span>
+                  <span class="h-2.5 w-2.5 rounded-full <%= s === 'Selesai' ? 'bg-green-600' : 'bg-amber-600' %>"></span>
+                  <span class="flex-1 text-sm font-medium"><%= j %></span>
+                  <span class="badge <%= s === 'Selesai' ? 'badge-ok' : 'badge-warn' %>"><%= s %></span>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+          <p class="mt-2 text-center text-xs text-slate-500">Contoh tampilan dashboard KERJAIN</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="fitur" class="lp-section">
+      <div class="lp-wrap">
+        <p class="lp-eyebrow">Fitur Utama</p>
+        <h2 class="lp-title">Semua pekerjaan tercatat dengan rapi</h2>
+        <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <% fitur.forEach(([ic, judul, teks]) => { %>
+            <article class="card">
+              <div class="lp-icon"><%- icon(ic) %></div>
+              <h3 class="mt-4 font-semibold"><%= judul %></h3>
+              <p class="mt-1 text-sm leading-relaxed text-slate-600"><%= teks %></p>
+            </article>
+          <% }) %>
+        </div>
+      </div>
+    </section>
+
+    <section id="cara-kerja" class="lp-section border-y border-slate-200 bg-white">
+      <div class="lp-wrap">
+        <p class="lp-eyebrow">Alur Penggunaan</p>
+        <h2 class="lp-title">Cara Kerja</h2>
+        <ol class="mt-8 grid gap-4 md:grid-cols-4">
+          <% langkah.forEach(([judul, teks], i) => { %>
+            <li class="flex gap-4 rounded-lg border border-slate-200 p-4 md:flex-col md:gap-3 md:p-5">
+              <span class="text-2xl font-semibold tabular-nums text-blue-600">0<%= i + 1 %></span>
+              <div>
+                <h3 class="font-semibold"><%= judul %></h3>
+                <p class="mt-1 text-sm leading-relaxed text-slate-600"><%= teks %></p>
+              </div>
+            </li>
+          <% }) %>
+        </ol>
+      </div>
+    </section>
+
+    <section id="integrasi" class="lp-section">
+      <div class="lp-wrap">
+        <p class="lp-eyebrow">Integrasi</p>
+        <h2 class="lp-title">Terintegrasi dengan Google</h2>
+        <div class="mt-8 grid gap-4 md:grid-cols-3">
+          <% google.forEach(([ic, judul, teks]) => { %>
+            <article class="card">
+              <div class="lp-icon"><%- icon(ic) %></div>
+              <h3 class="mt-4 font-semibold"><%= judul %></h3>
+              <p class="mt-1 text-sm leading-relaxed text-slate-600"><%= teks %></p>
+            </article>
+          <% }) %>
+        </div>
+
+        <div class="card mt-4">
+          <h3 class="text-sm font-semibold">Akses yang diminta saat masuk</h3>
+          <ul class="mt-2 space-y-1.5 text-sm text-slate-600">
+            <li><span class="font-medium text-slate-800">Email dan profil dasar</span> untuk mengenali akun pengguna yang masuk.</li>
+            <li><span class="font-medium text-slate-800">Google Sheets</span> untuk menyimpan dan membaca data logbook pada spreadsheet KERJAIN.</li>
+            <li><span class="font-medium text-slate-800">Google Drive (hanya file yang dibuat atau dibuka oleh KERJAIN)</span> untuk menyimpan evidence pekerjaan.</li>
+          </ul>
+        </div>
+
+        <p class="mt-4 rounded-md border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600">
+          KERJAIN menggunakan layanan Google untuk autentikasi dan penyimpanan data tertentu. KERJAIN tidak berafiliasi dengan Google.
+        </p>
+      </div>
+    </section>
+
+    <section class="lp-section border-y border-slate-200 bg-white">
+      <div class="lp-wrap grid gap-8 md:grid-cols-2">
+        <div>
+          <p class="lp-eyebrow">Keamanan dan Privasi</p>
+          <h2 class="lp-title">Data Anda Tetap Terjaga</h2>
+        </div>
+        <ul class="space-y-3">
+          <% keamanan.forEach((poin) => { %>
+            <li class="flex gap-3 text-sm leading-relaxed text-slate-700">
+              <span class="mt-0.5 shrink-0 text-green-600"><%- icon('check', 'h-5 w-5') %></span><span><%= poin %></span>
+            </li>
+          <% }) %>
+        </ul>
+      </div>
+    </section>
+
+    <section class="lp-section">
+      <div class="lp-wrap">
+        <div class="rounded-lg border border-slate-200 bg-white px-5 py-8 text-center md:px-10 md:py-12">
+          <h2 class="lp-title">Mulai dokumentasikan pekerjaan Anda</h2>
+          <p class="mx-auto mt-3 max-w-xl text-base leading-relaxed text-slate-600">Catat pekerjaan dengan lebih terstruktur dan jadikan setiap aktivitas memiliki dokumentasi yang jelas.</p>
+          <a href="/auth/google" class="btn btn-primary mt-6 w-full sm:w-auto"><%- icon('lock', 'h-4 w-4') %> Masuk dengan Google</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-slate-200 bg-white" style="padding-bottom: env(safe-area-inset-bottom)">
+    <div class="lp-wrap flex flex-col gap-4 py-8 text-sm sm:flex-row sm:items-end sm:justify-between">
+      <div>
+        <div class="font-bold tracking-tight text-blue-600">KERJAIN</div>
+        <div class="text-slate-600">Catat. Kerjakan. Buktikan.</div>
+        <div class="mt-3 text-slate-500">&copy; <%= tahun %> KERJAIN</div>
+      </div>
+      <nav class="flex gap-5" aria-label="Tautan kebijakan">
+        <a href="/privasi" class="text-slate-600 hover:text-blue-600">Privasi</a>
+        <a href="/ketentuan" class="text-slate-600 hover:text-blue-600">Ketentuan Penggunaan</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

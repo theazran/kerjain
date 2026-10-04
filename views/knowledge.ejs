@@ -1,0 +1,86 @@
+<%- include('layout', { part: 'head' }) %>
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">Knowledge Base</h1>
+    <p class="text-sm text-slate-500">Kumpulan masalah yang sering terjadi beserta penyebab dan solusinya.</p>
+  </div>
+  <a href="#form" class="btn btn-primary" data-kb-new><%- icon('plus', 'h-4 w-4') %> Tambah Artikel</a>
+</div>
+
+<form class="card mb-4" method="get" action="/knowledge" role="search">
+  <div class="relative">
+    <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"><%- icon('search', 'h-4 w-4') %></span>
+    <input type="search" name="q" value="<%= q %>" class="input pl-9" placeholder="Cari masalah, misalnya: printer offline" aria-label="Cari artikel">
+  </div>
+</form>
+
+<% const groups = Object.keys(kelompok).sort(); %>
+<% if (!groups.length) { %>
+  <div class="card empty">
+    <p class="font-medium"><%= total ? 'Tidak ada artikel yang cocok.' : 'Belum ada artikel.' %></p>
+    <p class="text-sm text-slate-500">Dokumentasikan solusi masalah agar mudah ditemukan kembali.</p>
+  </div>
+<% } %>
+<div class="space-y-4">
+  <% groups.forEach((g) => { %>
+    <section class="card">
+      <h2 class="card-title mb-2"><%= g %> <span class="font-normal text-slate-500">(<%= kelompok[g].length %>)</span></h2>
+      <div class="divide-y divide-slate-100">
+        <% kelompok[g].forEach((k) => { %>
+          <details class="kb-item">
+            <summary><%= k.judul %></summary>
+            <dl class="detail-list mt-3">
+              <% [['Masalah', k.masalah], ['Penyebab', k.penyebab], ['Solusi', k.solusi]].forEach(([label, val]) => { if (!val) return; %>
+                <div><dt><%= label %></dt><dd><%= val %></dd></div>
+              <% }) %>
+              <% if (safeUrl(k.evidence_url)) { %><div><dt>Evidence</dt><dd><a href="<%= k.evidence_url %>" target="_blank" rel="noopener" class="font-medium text-blue-600">Buka Evidence</a></dd></div><% } %>
+            </dl>
+            <div class="mt-3 flex gap-2">
+              <button type="button" class="btn btn-outline btn-sm" data-kb-edit='<%- JSON.stringify(k).replace(/'/g, "&#39;").replace(/</g, "\\u003c") %>'>Edit</button>
+              <button type="button" class="btn btn-danger-outline btn-sm" data-delete="/api/knowledge/<%= k.id %>" data-confirm="Hapus artikel ini?">Hapus</button>
+            </div>
+          </details>
+        <% }) %>
+      </div>
+    </section>
+  <% }) %>
+</div>
+
+<form id="form" class="card mt-6 space-y-4 scroll-mt-20" data-kb-form <%= draft ? 'data-open' : '' %>>
+  <h2 class="card-title" data-kb-title>Tambah Artikel</h2>
+  <input type="hidden" name="id" value="">
+  <div class="form-grid">
+    <div>
+      <label class="label" for="k-kelompok">Kelompok</label>
+      <input id="k-kelompok" name="kelompok" class="input" maxlength="60" list="kb-kelompok" placeholder="SIPP, Printer, Jaringan..." value="<%= draft ? draft.kelompok : '' %>">
+      <datalist id="kb-kelompok"><% [...new Set([...groups, ...Object.values(kategoriMap).flat()])].forEach((g) => { %><option value="<%= g %>"><% }) %></datalist>
+    </div>
+    <div>
+      <label class="label" for="k-judul">Judul <span class="text-red-600">*</span></label>
+      <input id="k-judul" name="judul" class="input" maxlength="200" placeholder="Contoh: SIPP tidak bisa login" value="<%= draft ? draft.judul : '' %>">
+    </div>
+    <div class="md:col-span-2">
+      <label class="label" for="k-masalah">Masalah</label>
+      <textarea id="k-masalah" name="masalah" rows="2" class="input"><%= draft ? draft.masalah : '' %></textarea>
+    </div>
+    <div class="md:col-span-2">
+      <label class="label" for="k-penyebab">Penyebab</label>
+      <textarea id="k-penyebab" name="penyebab" rows="2" class="input"></textarea>
+    </div>
+    <div class="md:col-span-2">
+      <label class="label" for="k-solusi">Solusi</label>
+      <textarea id="k-solusi" name="solusi" rows="4" class="input"><%= draft ? draft.solusi : '' %></textarea>
+    </div>
+    <div class="md:col-span-2">
+      <label class="label" for="k-evidence">Link Evidence</label>
+      <input id="k-evidence" name="evidence_url" type="url" class="input" placeholder="https://drive.google.com/..." value="<%= draft ? draft.evidence_url : '' %>">
+    </div>
+  </div>
+  <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+    <button type="reset" class="btn btn-outline">Kosongkan</button>
+    <button type="submit" class="btn btn-primary">Simpan Artikel</button>
+  </div>
+</form>
+
+<%- include('layout', { part: 'foot' }) %>

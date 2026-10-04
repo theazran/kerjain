@@ -1,0 +1,24 @@
+<%- include('layout', { part: 'head' }) %>
+
+<div class="flex min-h-[80vh] items-center justify-center">
+  <div class="card w-full max-w-sm text-center">
+    <div class="text-2xl font-bold tracking-tight text-blue-600">KERJAIN</div>
+    <p class="text-sm text-slate-600">Catat. Kerjakan. Buktikan.</p>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+      <h1 class="mt-6 text-base font-semibold"><%= title %></h1>
+      <p class="mt-1 text-sm text-slate-600"><%= pesan %></p>
+      <a href="/" class="btn btn-primary mt-6 w-full">Kembali ke Beranda</a>
+    <% } else { %>
+      <div class="mt-6 rounded border border-slate-200 p-4 text-left text-sm">
+        <div class="text-slate-500">Google Account</div>
+        <div class="font-medium">Belum terhubung</div>
+      </div>
+      <% if (pesan) { %><p class="mt-4 rounded border border-red-600/30 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert"><%= pesan %></p><% } %>
+      <a href="/auth/google" class="btn btn-primary mt-6 w-full">Hubungkan Google</a>
+      <p class="mt-4 text-xs leading-relaxed text-slate-500">Data pekerjaan disimpan di Google Spreadsheet dan evidence di Google Drive milik Anda.</p>
+    <% } %>
+  </div>
+</div>
+
+<%- include('layout', { part: 'foot' }) %>
